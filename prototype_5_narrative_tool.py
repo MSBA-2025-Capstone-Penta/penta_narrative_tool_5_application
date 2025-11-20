@@ -1637,7 +1637,7 @@ narr_top_terms = top_terms_by_cluster(
 # -------------------------------------------------------------------------------
 
 # ------------NAARRATIVE PROPAGATION ANALYSIS BLOCK------------------------------
-# --- FIXED: robust UTC coercion (safe for naive/tz-aware) ---
+# --- robust UTC coercion (safe for naive/tz-aware) ---
 
 
 def _to_utc(s: pd.Series) -> pd.Series:
@@ -1651,7 +1651,7 @@ def _canonicalize_urls(s: pd.Series) -> pd.Series:
     s = s.str.replace(r"[?#].*$", "", regex=True)
     return s.str.rstrip("/")
 
-# --- FIXED: make matches columns consistent & tz-aware ---
+# --- make matches columns consistent & tz-aware ---
 
 
 def coerce_matches_for_propagation(matches: pd.DataFrame) -> pd.DataFrame:
@@ -1929,7 +1929,7 @@ influencer_clusters.to_csv(infclust_path, index=False)
 narr_top_terms.to_frame().to_csv(narrterms_path, index=False)
 # -------------------------------------------------------------------------------
 
-# NEW: make corpus visible as corpus_with_hits_non_media for the Streamlit app
+# make corpus visible as corpus_with_hits_non_media for the Streamlit app
 corpus_with_hits_non_media = corpus
 globals()["corpus_with_hits_non_media"] = corpus_with_hits_non_media
 
@@ -1947,7 +1947,7 @@ df = leaderboard_std.copy() if "leaderboard_std" in globals(
 df["InfluenceScore"] = pd.to_numeric(df["InfluenceScore"], errors="coerce")
 topN = df.nlargest(15, "InfluenceScore").copy()
 
-# Optional: shorten long author strings for the y-axis
+# shorten long author strings for the y-axis
 
 
 def short(a):
@@ -2030,7 +2030,7 @@ str_pct["leaderboard"] = "Strict"
 
 plot_df = pd.concat([std_pct, str_pct], ignore_index=True)
 
-# (optional) ensure consistent role order across bars
+# ensure consistent role order across bars
 all_roles = plot_df["role"].unique().tolist()
 plot_df["role"] = pd.Categorical(
     plot_df["role"], categories=all_roles, ordered=True)
@@ -2074,11 +2074,11 @@ agg = (df.groupby("tweet_cluster")
               n=("lead_days", "size"))
          .reset_index())
 
-# Optional: filter out tiny clusters (to avoid noisy medians)
+# filter out tiny clusters (to avoid noisy medians)
 MIN_N = 25
 agg = agg.query("n >= @MIN_N")
 
-# Optional: human-readable cluster labels if you have narr_top_terms (Series: cluster_id → list/str)
+# human-readable cluster labels if you have narr_top_terms (Series: cluster_id → list/str)
 
 
 def label_cluster(c):
@@ -2312,7 +2312,7 @@ author_hits = (tw_only.assign(hit=(tw_only["cross_media_hit"] == 1))
                .groupby("author")["hit"].sum()
                .rename("n_hits"))
 
-# latest text per author (quick pretty)
+# latest text per author
 
 
 def pretty(s, n=140):
@@ -2341,7 +2341,7 @@ inf_exemplars.head(20)
 
 # --------------------TOP AUTHORS PER INFLUNCER PERSONA PLOT---------------------
 
-# Take the top-K authors per persona that you already built
+# Take the top-K authors per persona that was already built
 g = inf_exemplars.groupby("inf_cluster").head(5).copy()
 
 # Stable color map: one color per cluster (use new API)
@@ -2365,7 +2365,7 @@ ax.set_title("Top authors per influencer persona (by InfluenceScore)",
 ax.set_xlabel("InfluenceScore")
 ax.set_ylabel("Persona (inf_cluster) – Author")
 
-# Optional: annotate scores
+# annotate scores
 for b, s in zip(bars, g["InfluenceScore"]):
     ax.text(b.get_width() + 0.005, b.get_y() + b.get_height() /
             2, f"{s:.3f}", va="center", fontsize=8)
@@ -2385,7 +2385,7 @@ plt.show()
 # --- Config ---
 TOPK_PER_NARR = 15   # how many authors to return per narrative
 MIN_SHARE = 0.15  # author must devote at least 15% of posts to that narrative
-# author must have at least this many tweets overall (from your corpus)
+# author must have at least this many tweets overall (from the corpus)
 MIN_TWEETS = 3
 
 # 1) Long table of (author, narr_id, share_of_posts)
@@ -2394,7 +2394,7 @@ mix_long = (auth_narr_norm
             .melt(id_vars="author", var_name="narr_id", value_name="share"))
 
 # 2) Bring in author-level influence & volume
-# If you already built 'author_counts' earlier you can reuse it; otherwise recompute quickly:
+# If already built 'author_counts' earlier, it can be reused; otherwise recompute quickly:
 author_counts = (corpus.loc[corpus["_kind"] == "tweet"]
                  .groupby("author").size().rename("n_tweets"))
 
@@ -2463,7 +2463,7 @@ def plot_narrative_timeline(ts, cluster_id, out="plots/timeline_cluster_{cid}.pn
     ax1.set_ylabel("Count")
     ax1.set_title(f"Cluster {cluster_id}: Tweets vs Media")
 
-    # 👉 set x-axis ticks every 5 days
+    # set x-axis ticks every 5 days
     ax1.xaxis.set_major_locator(mdates.DayLocator(interval=5))
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     # optional: rotate labels so they don’t overlap
@@ -2629,10 +2629,10 @@ def plot_top_authors_for_window(
 
 # -------------------SPIKE-AUTHOR ATRRIBUTION INPUT BLOCK------------------------
 # plot of specific spike in specific cluster at certain time range
- # (sPIKE in Cluster 8 from "2025-06-28", "2025-07-08")
+ # Example: (SPIKE in Cluster 8 from "2025-06-28", "2025-07-08")
  # INPUT: start_date, end_date, leaderboard (strict or standard or none)
-plot_top_authors_for_window(
-    corpus, 10, "2025-08-07", "2025-08-11", leaderboard_df=None)
+# plot_top_authors_for_window(
+#     corpus, 10, "2025-08-07", "2025-08-11", leaderboard_df=None)
 
 # ------------------------TOP CENTRAL INFLUENCER NAMES AND METRICS BLOCK---------
 
@@ -2656,7 +2656,7 @@ def build_top_table(cent_df: pd.DataFrame, prefix: str, k: int = 15) -> pd.DataF
     if d.empty:
         return pd.DataFrame(columns=["name", "in_degree", "out_degree", "betweenness", "hub_score"])
 
-    # Simple composite to break ties (tune weights if you like)
+    # Simple composite to break ties (tune weights if needed)
     d["hub_score"] = d["in_degree"]*1.0 + \
         d["out_degree"]*0.5 + d["betweenness"]*10.0
 
@@ -2679,9 +2679,9 @@ top_outlets.to_csv("output/top_central_outlets.csv", index=False)
 # -------------------------------------------------------------------------------
 
 # -----------TOP Central Authors” bar chart--------------------------------------
-# which authors and outlets the multiple narratives nbest through narrative popagation
+# which authors and outlets touch multiple narratives best through narrative propagation
 # who are most structurally influential
-# bridge multiple narratives becasue thier content touches multiple topics
+# bridge multiple narratives because their content touches multiple topics
 # connect/bridge narratives
 
 
