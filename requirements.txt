@@ -1,18 +1,15 @@
 # Core app
-streamlit==1.32.2      
-pandas==2.2.2           
-
-
-numpy                    
-scikit-learn             
-scipy                    
-
+streamlit==1.32.2
+pandas==2.2.2
+numpy
+matplotlib==3.8.4
+scikit-learn
+scipy
 openpyxl==3.1.2
 
 # NLP / embeddings
 sentence-transformers==2.7.0
 transformers==4.39.3
-
 
 # spaCy + small English model
 spacy==3.7.4
@@ -22,8 +19,6 @@ en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_
 tqdm==4.66.4
 regex==2024.5.15
 requests==2.31.0
-python-dateutil==2.9.0.post0
-pyarrow==15.0.2
 networkx==3.2.1
 ruptures==1.1.9
 altair==5.3.0
