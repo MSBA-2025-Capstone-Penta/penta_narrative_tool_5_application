@@ -10,7 +10,7 @@ openpyxl==3.1.2
 # NLP / embeddings
 sentence-transformers==2.7.0
 transformers==4.39.3
-torch==2.2.2              # CPU wheel; no explicit CUDA deps
+
 
 # spaCy + small English model
 spacy==3.7.4
