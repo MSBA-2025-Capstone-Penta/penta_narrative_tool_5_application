@@ -2,6 +2,7 @@
 torch==2.2.2
 sentence-transformers==2.2.2
 transformers==4.39.3
+huggingface-hub==0.24.0
 streamlit
 pandas
 numpy
