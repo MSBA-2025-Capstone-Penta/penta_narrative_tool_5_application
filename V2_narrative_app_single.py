@@ -524,13 +524,29 @@ def make_top_centrality_fig(df: pd.DataFrame, title: str) -> Figure:
 
 def main():
     st.set_page_config(
-        page_title="Narrative Influencer Tool – Streamlit Dashboard",
+        page_title="Story Propagation and Influence Network – SPIN",
         layout="wide",
     )
 
-    st.title("Narrative Influencer Tool – Streamlit Dashboard")
+    LOGO_PATH = "app_assets/spin_logo.png"
+
+    # ---- Centered, smaller logo ----
+    col_left, col_center, col_right = st.columns([1, 2, 1])
+
+    with col_center:
+        st.image(
+            LOGO_PATH,
+            width=205,          # <<< Adjust the logo size here (200–260)
+            use_container_width=False
+        )
+
+    st.title("Story Propagation and Influence Network – SPIN")
     st.markdown(
         """
+This tool maps how narratives spread across social and traditional media, 
+identifies the key actors driving or amplifying those narratives, and 
+measures their influence over time.
+
 This app wraps the 'prototype_5_narrative_tool.py`
 pipeline and exposes it as an interactive dashboard.
 
