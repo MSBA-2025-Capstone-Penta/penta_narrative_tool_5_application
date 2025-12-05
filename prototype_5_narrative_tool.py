@@ -79,7 +79,7 @@ from sklearn.metrics import silhouette_score
 # Pretrained models to generate dense sentence embeddings.
 from sentence_transformers import SentenceTransformer
 
-# Optional graph / change-point libs (kept for your pipeline)
+# Optional graph / change-point libs (kept for the pipeline)
 # Build/analyze graphs (author→outlet, URL diffusion) and compute centralities.
 import networkx as nx
 try:
@@ -103,9 +103,6 @@ warnings.filterwarnings("ignore", message="Glyph .* missing from font")
 tweets_path = Path("tweets_input.xlsx")
 media_path = Path("media_input.xlsx")
 
-# output directory (current folder)
-# out_dir = Path(".")
-# out_dir.mkdir(parents=True, exist_ok=True)
 out_dir = Path("output")
 out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -115,7 +112,7 @@ CACHE_ROOT.mkdir(parents=True, exist_ok=True)
 # -------------------------------------------------------------------------------
 
 # ----------------------- DATE FILTER BLOCK-------------------------------------
-# literal default dates from prototype_5_narrative.py.
+# literal default dates from prototype_5_narrative_tool_colab_version.ipynb
 # "2025-08-01" and "2025-09-15" are only placeholder dates for the purpose of this app.
 # dates will get applied only if the core script is ran outside of this app and no env vars are applied
 start_date_default = "2025-08-01"  # start date (yyyy-mm-dd)
@@ -412,7 +409,7 @@ corpus = pd.concat(
     ignore_index=True
 )
 
-# ADD THIS RIGHT HERE (once)
+# masks
 tweet_mask = corpus["_kind"].eq("tweet")
 media_mask = corpus["_kind"].eq("media")
 
@@ -454,7 +451,7 @@ def pre_tfidf_clean(s: str) -> str:
     s = str(s).lower()
     s = re.sub(r"https?://\S+", " ", s)  # remove URLs
     s = re.sub(r"[@#]", " ", s)  # strip @ and #
-    s = re.sub(r"[^a-z0-9'\s-]", " ", s)   # keep words/digits/'/space/-
+    s = re.sub(r"[^a-z0-9'\s-]", " ", s)  # keep words/digits/'/space/-
     s = re.sub(r"\s+", " ", s).strip()
     tokens = [w for w in s.split() if len(w) > 1 and w not in CUSTOM_STOPS]
     return " ".join(tokens)
@@ -825,7 +822,7 @@ DROP_PATTERNS = [
 DROP_RE = re.compile("|".join(DROP_PATTERNS), flags=re.IGNORECASE)
 
 # Shape/heuristics used by the validator
-ACRONYM_RE = re.compile(r"^[A-Z]{2,}$")   # RSVP, NPN
+ACRONYM_RE = re.compile(r"^[A-Z]{2,}$")  # RSVP, NPN
 MIXED_ALNUM_RE = re.compile(
     r".*[A-Za-z].*\d|.*\d.*[A-Za-z].*")  # a1pha / 123abc
 SUFFIXES = {"jr", "sr", "ii", "iii", "iv"}
@@ -960,13 +957,13 @@ def _spacy_extract_batch(texts):
 
     try:
         # Force a simple, robust configuration: CPU, single process.
-        # (This is fast enough for your dataset and avoids Windows/Streamlit mp issues.)
+        # (This is fast enough for the dataset and avoids Windows/Streamlit mp issues.)
         docs = nlp.pipe(
             texts,
             batch_size=min(SPACY_BATCH_SIZE, 128),
             n_process=1,
         )
-        USED_SPACY_FOR_NER = True        # <- spaCy actually ran
+        USED_SPACY_FOR_NER = True   # <- spaCy actually ran
         return _extract_from_docs(docs)
     except Exception as e:
         # Log to the terminal so you can see what went wrong if it happens again.
@@ -1137,7 +1134,7 @@ URL_RE = r"https?://\S+"
 
 def canonicalize(url_series: pd.Series) -> pd.Series:
     s = url_series.astype(str)
-    s = s.mask(s.str.strip().eq(""), np.nan)              # treat "" as NaN
+    s = s.mask(s.str.strip().eq(""), np.nan)  # treat "" as NaN
     s = s.str.replace(r"https?://(www\.)?", "", regex=True)
     s = s.str.replace(r"[?#].*$", "", regex=True)
     s = s.str.rstrip("/")
@@ -1169,7 +1166,7 @@ url_join = (
     )
 )
 # Timing filter (lead/lag logic)
-# Keeps pairs where the article appears 0..WINDOW_DAYS after the tweet, aligning with your “tweet preceded coverage” assumption.
+# Keeps pairs where the article appears 0..WINDOW_DAYS after the tweet, aligning with the “tweet preceded coverage” assumption.
 url_join["lead_days"] = (to_dt(url_join["time_media"]) -
                          to_dt(url_join["time_tweet"])).dt.days
 url_join = url_join[(url_join["lead_days"] >= 0) & (
@@ -1250,7 +1247,7 @@ OVERSAMPLE_TIME = 1.0  # 1.0 = strict window; >1 expands slightly
 USE_EMBEDS = bool(USE_EMBEDDINGS_FOR_MATCH and (E is not None))
 HYBRID_WT = float(HYBRID_EMBED_WT)
 
-SIM_THR = float(SIM_THRESHOLD)   # from your config
+SIM_THR = float(SIM_THRESHOLD)   # from the config
 TOPK_K = int(TOPK_PER_TWEET) if TOPK_PER_TWEET is not None else None
 WIN_D = int(WINDOW_DAYS)
 
@@ -1411,7 +1408,7 @@ if not matches.empty:
              lead_days_min=("lead_days", "min"))
         .astype({"distinct_outlets": "Int64", "lead_days_min": "Int64"})
     )
-    # Write the aggregates back onto the right tweet rows AND Compute hit flags using your thresholds
+    # Write the aggregates back onto the right tweet rows AND Compute hit flags using the thresholds
     corpus.loc[per_tweet.index,
                "hits_outlets"] = per_tweet["distinct_outlets"].values
     corpus.loc[per_tweet.index,
@@ -1548,7 +1545,7 @@ leaderboard_strict = add_explain(leaderboard_strict)
 
 # Select tweet rows & keep just author/cluster
 # Uses only tweets (not media).
-# Needs each tweet’s assigned narrative cluster from your earlier K-Means.
+# Needs each tweet’s assigned narrative cluster from the earlier K-Means.
 tw = corpus.loc[corpus["_kind"] == "tweet", ["author", "cluster"]].dropna()
 
 # Build an author × narrative frequency table
@@ -2296,7 +2293,7 @@ inf_exemplars = top_authors_per_infcluster(exemplars, k=5)
 
 
 def persona_label(cid):
-    # uses your top_narratives_per_cluster + narr_labels if available
+    # uses the top_narratives_per_cluster + narr_labels if available
     try:
         tops = top_narratives_per_cluster.get(int(cid), [])
         names = [narr_labels.get(int(n), str(n)) for n in tops[:2]]

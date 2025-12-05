@@ -3,7 +3,8 @@ narrative_tool_app.py
 
 Streamlit dashboard wrapper for:
   prototype_5_narrative_tool.py
-  prototype_5_narrative_tool.py was originally produced in google colab
+  prototype_5_narrative_tool.py was originally produced in google colab from
+  prototype_5_narrative_tool_colab_version.ipynb
 
 - Uses the SAME workflow / methodology as the core script by:
     * Loading that script from disk
@@ -586,7 +587,7 @@ explore the narrative clusters, propagation patterns, leaderboards, and NER resu
         )
 
         if ngram_option is None:
-            ngram_option = "(1,2)"   # safety fallback
+            ngram_option = "(1,2)"  # safety fallback
 
         # Parse "(1,2)" -> (1, 2)
         ngram_tuple = tuple(int(x)
@@ -670,7 +671,7 @@ explore the narrative clusters, propagation patterns, leaderboards, and NER resu
                 st.warning(
                     "NER backend: regex-only (spaCy not installed or could not be loaded).")
 
-            # DEBUG: check whether spaCy was loaded in the core script############
+            # spaCy NER INDICATION: check whether spaCy was loaded in the core script when running
             # st.write("HAS_SPACY from core script:", ns.get("HAS_SPACY"))
             # st.write("USED_SPACY_FOR_NER from core script:",
             #          ns.get("USED_SPACY_FOR_NER"))
